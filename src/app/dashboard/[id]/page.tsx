@@ -8,6 +8,7 @@ import {
 import StatusButton from './StatusButton'
 import ShareButton from './ShareButton'
 import ProjektAbschliessen from './ProjektAbschliessen'
+import RealtimeGewerke from './RealtimeGewerke'
 
 function StatusBadge({ status }: { status: string }) {
   if (status === 'fertig') return (
@@ -77,6 +78,7 @@ export default async function BaustelleDetailPage({ params }: { params: Promise<
         </div>
       </header>
 
+      <RealtimeGewerke projektId={id} />
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-4">
         {/* Info Karte */}
         <div className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">

@@ -9,6 +9,13 @@ const geist = Geist({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Baustellen-Koordinator",
   description: "Koordiniere deine Baustelle einfach und digital",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Baustellen-Koordinator",
+  },
+  themeColor: "#f97316",
 };
 
 export default function RootLayout({

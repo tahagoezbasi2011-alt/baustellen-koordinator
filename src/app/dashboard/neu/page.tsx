@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Trash2, GripVertical } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Calendar, User, Mail, Building2, FileText } from 'lucide-react'
 
 const GEWERKE_VORSCHLAEGE = [
   'Erdarbeiten', 'Maurer', 'Betonbau', 'Zimmerer', 'Dachdecker',
@@ -16,6 +16,7 @@ interface Gewerk {
   name: string
   handwerker_name: string
   handwerker_email: string
+  faellig_am: string
 }
 
 export default function NeuesBaustellePage() {
@@ -23,7 +24,7 @@ export default function NeuesBaustellePage() {
   const [adresse, setAdresse] = useState('')
   const [beschreibung, setBeschreibung] = useState('')
   const [gewerke, setGewerke] = useState<Gewerk[]>([
-    { name: '', handwerker_name: '', handwerker_email: '' }
+    { name: '', handwerker_name: '', handwerker_email: '', faellig_am: '' }
   ])
   const [laden, setLaden] = useState(false)
   const [fehler, setFehler] = useState('')
@@ -31,7 +32,7 @@ export default function NeuesBaustellePage() {
   const supabase = createClient()
 
   function gewerkHinzufuegen() {
-    setGewerke([...gewerke, { name: '', handwerker_name: '', handwerker_email: '' }])
+    setGewerke([...gewerke, { name: '', handwerker_name: '', handwerker_email: '', faellig_am: '' }])
   }
 
   function gewerkEntfernen(index: number) {
@@ -73,18 +74,18 @@ export default function NeuesBaustellePage() {
       reihenfolge: i + 1,
       handwerker_name: g.handwerker_name,
       handwerker_email: g.handwerker_email,
+      faellig_am: g.faellig_am || null,
     }))
 
     await supabase.from('gewerke').insert(gewerkeDaten)
-
     router.push(`/dashboard/${projekt.id}`)
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <Link href="/dashboard" className="text-gray-500 hover:text-gray-700">
+          <Link href="/dashboard" className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-2xl transition">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="font-bold text-gray-900">Neue Baustelle</h1>
@@ -92,74 +93,82 @@ export default function NeuesBaustellePage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-6">
-        <form onSubmit={speichern} className="space-y-6">
+        <form onSubmit={speichern} className="space-y-4">
           {/* Basisdaten */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-4">
-            <h2 className="font-semibold text-gray-900">Baustellen-Infos</h2>
+          <div className="bg-white rounded-3xl border border-gray-100 p-5 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="bg-orange-100 p-2 rounded-xl">
+                <Building2 className="w-4 h-4 text-orange-500" />
+              </div>
+              <h2 className="font-bold text-gray-900">Baustellen-Infos</h2>
+            </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Name *</label>
               <input
                 required
                 value={name}
                 onChange={e => setName(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50"
                 placeholder="z.B. Einfamilienhaus Musterstraße"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Adresse</label>
               <input
                 value={adresse}
                 onChange={e => setAdresse(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50"
                 placeholder="Musterstraße 1, 12345 Musterstadt"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Beschreibung</label>
               <textarea
                 value={beschreibung}
                 onChange={e => setBeschreibung(e.target.value)}
-                rows={3}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
-                placeholder="Kurze Beschreibung des Projekts..."
+                rows={2}
+                className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 resize-none"
+                placeholder="Kurze Beschreibung..."
               />
             </div>
           </div>
 
           {/* Gewerke */}
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h2 className="font-semibold text-gray-900 mb-1">Gewerke & Reihenfolge</h2>
-            <p className="text-sm text-gray-500 mb-4">In welcher Reihenfolge werden die Gewerke ausgeführt?</p>
+          <div className="bg-white rounded-3xl border border-gray-100 p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="bg-blue-100 p-2 rounded-xl">
+                <FileText className="w-4 h-4 text-blue-500" />
+              </div>
+              <h2 className="font-bold text-gray-900">Gewerke & Reihenfolge</h2>
+            </div>
+            <p className="text-xs text-gray-400 mb-4 ml-1">In welcher Reihenfolge werden die Gewerke ausgeführt?</p>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {gewerke.map((gewerk, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-3">
+                <div key={index} className="border border-gray-100 rounded-2xl p-4 bg-gray-50">
                   <div className="flex items-center gap-2 mb-3">
-                    <GripVertical className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-500">Gewerk {index + 1}</span>
+                    <div className="w-6 h-6 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center text-xs font-bold">
+                      {index + 1}
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600">Gewerk {index + 1}</span>
                     {gewerke.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => gewerkEntfernen(index)}
-                        className="ml-auto text-red-400 hover:text-red-600"
-                      >
+                      <button type="button" onClick={() => gewerkEntfernen(index)} className="ml-auto text-red-400 hover:text-red-600">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">Gewerk *</label>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Gewerk *</label>
                       <input
                         list={`vorschlaege-${index}`}
                         value={gewerk.name}
                         onChange={e => gewerkAktualisieren(index, 'name', e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
                         placeholder="z.B. Elektriker"
                       />
                       <datalist id={`vorschlaege-${index}`}>
@@ -169,24 +178,40 @@ export default function NeuesBaustellePage() {
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Handwerker Name</label>
+                        <label className="flex items-center gap-1 text-xs font-medium text-gray-500 mb-1">
+                          <User className="w-3 h-3" /> Name
+                        </label>
                         <input
                           value={gewerk.handwerker_name}
                           onChange={e => gewerkAktualisieren(index, 'handwerker_name', e.target.value)}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
                           placeholder="Max Mustermann"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">E-Mail</label>
+                        <label className="flex items-center gap-1 text-xs font-medium text-gray-500 mb-1">
+                          <Mail className="w-3 h-3" /> E-Mail
+                        </label>
                         <input
                           type="email"
                           value={gewerk.handwerker_email}
                           onChange={e => gewerkAktualisieren(index, 'handwerker_email', e.target.value)}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
                           placeholder="email@firma.de"
                         />
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="flex items-center gap-1 text-xs font-medium text-gray-500 mb-1">
+                        <Calendar className="w-3 h-3" /> Geplantes Datum (optional)
+                      </label>
+                      <input
+                        type="date"
+                        value={gewerk.faellig_am}
+                        onChange={e => gewerkAktualisieren(index, 'faellig_am', e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+                      />
                     </div>
                   </div>
                 </div>
@@ -196,23 +221,20 @@ export default function NeuesBaustellePage() {
             <button
               type="button"
               onClick={gewerkHinzufuegen}
-              className="mt-3 flex items-center gap-2 text-orange-500 hover:text-orange-600 text-sm font-medium"
+              className="mt-3 flex items-center gap-2 text-orange-500 hover:text-orange-600 text-sm font-semibold"
             >
-              <Plus className="w-4 h-4" />
-              Gewerk hinzufügen
+              <Plus className="w-4 h-4" /> Gewerk hinzufügen
             </button>
           </div>
 
           {fehler && (
-            <div className="bg-red-50 text-red-600 text-sm rounded-lg px-3 py-2">
-              {fehler}
-            </div>
+            <div className="bg-red-50 text-red-600 text-sm rounded-2xl px-4 py-3">{fehler}</div>
           )}
 
           <button
             type="submit"
             disabled={laden}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 rounded-xl transition disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-4 rounded-3xl transition-all shadow-lg shadow-orange-200 disabled:opacity-50"
           >
             {laden ? 'Wird gespeichert...' : 'Baustelle anlegen'}
           </button>

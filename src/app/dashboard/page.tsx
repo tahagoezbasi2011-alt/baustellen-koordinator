@@ -5,6 +5,7 @@ import {
   HardHat, Plus, MapPin, ChevronRight, LogOut,
   CheckCircle2, Clock, Briefcase, TrendingUp, Building2
 } from 'lucide-react'
+import Suche from './Suche'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -85,6 +86,11 @@ export default async function DashboardPage() {
             <div className="text-xs text-gray-400 mt-0.5">Gewerke</div>
           </div>
         </div>
+
+        {/* Suche */}
+        {projekte && projekte.length > 0 && (
+          <Suche projekte={projekte} />
+        )}
 
         {/* Neue Baustelle */}
         <Link
